@@ -1,0 +1,5 @@
+gensim>=3.4.0
+matplotlib>=2.2.2
+scipy>=1.1.0
+numpy>=1.14.5
+joblib>=0.12.0
