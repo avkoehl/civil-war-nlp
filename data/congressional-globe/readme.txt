@@ -8,6 +8,3 @@ Missing the trail of Andrew Johnson (40th)
 Missing 34th Session2
 
 For the most part all the appendix and indexes to debates are included in relevant session
-
-Now need to create simple csv
-congress_session, start date, end date
