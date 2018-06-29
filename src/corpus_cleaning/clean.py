@@ -1,34 +1,97 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 import re
-import enchant
+import os
 
+def load_dictionary():
+    dictionary = []
+    with open ("words.txt", "r") as d:
+        for line in d:
+            dictionary.append(line.rstrip().lower())
+    return dictionary
 
-def get_words (fname):
-    d = enchant.Dict("en_US") 
-    stoplist = "mr on cay clay for a of the and to in".split()
-    
+def load_stopwords():
+    stopwords = []
+    with open ("stop_words.txt", "r") as s:
+        doc = s.read()
+        stopwords = doc.rstrip().split(" ")
+    return stopwords
+
+def get_dirnames():
+    path = '../../data/congressional-globe/raw-ocr-text/'
+    sessions = []
+    dirnames = []
+    for i in range (23, 43): #for each Congress
+        for dirname, subdirlist, filelist in os.walk(path + str(i)):
+            dirnames.append(dirname)
+
+    dirnames.sort()
+    directories = []
+
+    for dirname in dirnames:
+       if "session" in dirname and os.listdir(dirname):
+          directories.append(dirname)
+    return directories
+
+def clean_text(inputfile, dictionary, stopwords):
+    print ("cleaning ", inputfile)
     words = []
-    with open (fname, "r") as ifile:
-        lines = []
-        for line in ifile:
-            tokens = line.rstrip().split(" ")
-            for t in tokens:
-              t = re.sub("[^a-zA-Z]+", "", t).lower()
-              if len(t) < 2:
-                  continue
-              if stoplist.count(t) == 0 and d.check(t):
-                  words.append(t)
-                
-
+    nlines = 0
     c = 0
+    ifile = open(inputfile, "r")
+    for l in ifile:
+        nlines = nlines + 1
+
+    ifile = open(inputfile, "r")
+    for line in ifile:
+        if c % 500 == 0:
+            print ("cleaning ... " , "{0:.2f}".format(c/nlines * 100), " % done")
+        tokens = line.rstrip().split(" ")
+        for t in tokens:
+            t = re.sub("[^a-zA-Z]+", "", t).lower()
+            if len(t) < 2:
+                continue
+            if stopwords.count(t) == 0 and dictionary.count(t) > 0:
+                words.append(t)
+        c = c + 1
+
+
+    return words
+
+def create_ngrams(outputfile, words):
+    print ("extracting ngrams and writing to ", outputfile)
     ngram = []
     ngrams = []
-    for w in words:
-        if c < 10:
-            ngram.append(w)
-            c = c + 1
-        else:
-            ngrams.append(ngram)
-            ngram = []
-            c = 0
     
-    return ngrams
+    counter = 0
+    for i,w in enumerate(words):
+        if i == len(w):
+            ngrams.append(" ".join(ngram))
+
+        if counter < 10:
+            ngram.append(w)
+            counter = counter + 1
+        else:
+            ngrams.append(" ".join(ngram))
+            ngram = []
+            counter = 0
+
+    with open(outputfile, "w") as ofile:
+        for n in ngrams:
+            print(n, file=ofile)
+
+def main():
+
+    dictionary = load_dictionary()
+    stopwords = load_stopwords()
+
+    dirs = get_dirnames()
+    for d in dirs:
+        inputfile = d + "/all.txt"
+        outputfile = "../../data/congressional-globe/clean-text/" + d.split('/')[-2] + "_" + d.split('/')[-1] + ".txt"
+        words = clean_text(inputfile, dictionary, stopwords)
+        create_ngrams(outputfile, words)
+
+if __name__ == "__main__":
+    main()
