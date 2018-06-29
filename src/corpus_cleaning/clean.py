@@ -3,6 +3,7 @@
 
 import re
 import os
+import joblib import Parallel, delayed
 
 def load_dictionary():
     dictionary = []
@@ -80,6 +81,12 @@ def create_ngrams(outputfile, words):
     with open(outputfile, "w") as ofile:
         for n in ngrams:
             print(n, file=ofile)
+
+def clean_and_write (directory,, dictionary, stopwords, outputfile):
+    inputfile = d + "/all.txt"
+    outputfile = "../../data/congressional-globe/clean-text/" + d.split('/')[-2] + "_" + d.split('/')[-1] + ".txt"
+    words = clean_text(inputfile, dictionary, stopwords)
+    create_ngrams(outputfile, words)
 
 def main():
 
