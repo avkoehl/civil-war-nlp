@@ -23,7 +23,7 @@ def get_dirnames():
     path = '../../data/congressional-globe/raw-ocr-text/'
     sessions = []
     dirnames = []
-    for i in range (23, 43): #for each Congress
+    for i in range (23, 43):
         for dirname, subdirlist, filelist in os.walk(path + str(i)):
             dirnames.append(dirname)
 
@@ -46,8 +46,8 @@ def clean_text(inputfile, dictionary, stopwords):
 
     ifile = open(inputfile, "r")
     for line in ifile:
-        if c % 500 == 0:
-            print ("cleaning ... " , "{0:.2f}".format(c/nlines * 100), " % done")
+        if c % 1000 == 0:
+            print (inputfile.split('/')[-3] + "-" + inputfile.split('/')[-2] + " ... " , "{0:.2f}".format(c/nlines * 100), " %")
         tokens = line.rstrip().split(" ")
         for t in tokens:
             t = re.sub("[^a-zA-Z]+", "", t).lower()
@@ -90,7 +90,7 @@ def clean_and_write (directory, dictionary, stopwords):
 
 def main():
 
-    num_cores = 3
+    num_cores = 15 
 
     dictionary = load_dictionary()
     stopwords = load_stopwords()
